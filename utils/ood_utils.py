@@ -1,5 +1,6 @@
 import torch.nn.functional as F
 import torch.nn as nn
+import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from datasets.sncore_4k import *
 # noinspection PyUnresolvedReferences
@@ -151,6 +152,7 @@ def get_network_output(model, loader, softmax=True):
     all_logits = []
     all_pred = []
     all_labels = []
+    all_points = []
     model.eval()
     for i, batch in enumerate(tqdm(loader, disable=DISABLE_TQDM), 0):
         points, labels = batch[0], batch[1]
@@ -167,10 +169,12 @@ def get_network_output(model, loader, softmax=True):
         _, pred = logits.data.max(1)
         all_pred.append(pred)
         all_labels.append(labels)
+        all_points.append(points)
     all_logits = torch.cat(all_logits, dim=0)
     all_pred = torch.cat(all_pred, dim=0)
     all_labels = torch.cat(all_labels, dim=0)
-    return all_logits, all_pred, all_labels
+    all_points = torch.cat(all_points, dim=0)
+    return all_logits, all_pred, all_labels, all_points
 
 
 @torch.no_grad()
@@ -434,7 +438,7 @@ def get_ood_metrics(src_scores, tar_scores, src_label=1):
     return calc_metrics(scores, labels)
 
 
-def eval_ood_sncore(scores_list, preds_list=None, labels_list=None, src_label=1, silent=False):
+def eval_ood_sncore(scores_list, preds_list=None, labels_list=None, points_list=None, src_label=1, silent=False, Ancase=1):
     """
     conf_list: [SRC, TAR1, TAR2]
     preds_list: [SRC, TAR1, TAR2]
@@ -454,9 +458,9 @@ def eval_ood_sncore(scores_list, preds_list=None, labels_list=None, src_label=1,
     if not silent:
         print(f"AUROC - Src label: {src_label}, Tar label: {tar_label}")
 
-    src_conf, src_preds, src_labels = scores_list[0], preds_list[0], labels_list[0]
-    tar1_conf, _, _ = scores_list[1], preds_list[1], labels_list[1]
-    tar2_conf, _, _ = scores_list[2], preds_list[2], labels_list[2]
+    src_conf, src_preds, src_labels, src_points = scores_list[0], preds_list[0], labels_list[0], points_list[0]
+    tar1_conf, tar1_preds, tar1_labels, tar1_points = scores_list[1], preds_list[1], labels_list[1], points_list[1]
+    tar2_conf, tar2_preds, tar2_labels, tar2_points = scores_list[2], preds_list[2], labels_list[2], points_list[2]
 
     # compute ID test accuracy
     src_acc, src_bal_acc = -1, -1
@@ -482,6 +486,10 @@ def eval_ood_sncore(scores_list, preds_list=None, labels_list=None, src_label=1,
     # N.B. get_ood_metrics reports inverted AUPR_IN and AUPR_OUT results
     # as we use label 1 for IN-DISTRIBUTION and thus we consider it positive. 
     # the ood_metrics library argue to use 
+
+    if Ancase == 2:
+        failanalisis(tar1_conf, tar1_preds, tar1_labels, tar1_points)
+    
 
     if not silent:
         print_ood_output(res_tar1, res_tar2, res_big_tar)
@@ -532,3 +540,48 @@ def eval_ood_sncore_csi(model, train_loader, src_loader, tar1_loader, tar2_loade
     )
 
     return res
+###mod
+def failanalisis(tar_conf, tar_preds, tar_labels, tar_points):
+
+    tar1Label_string = ["bed", "toilet", "desk", "display"]
+    tar2Label_string = ["bag", "bin", "box", "cabinet", "pillow"]
+    realLabel_string = ["chair", "shelf", "door", "sink", "sofa"]
+
+    #srcScore = to_numpy(src_conf)
+    #valScore = to_numpy(val_conf)
+    tarScore = to_numpy(tar_conf)
+    tarPred = to_numpy(tar_preds)
+    tarLabel = to_numpy(tar_labels)
+    tarPoints = [t.numpy() for t in tar_points]
+
+    limit = 0.95 
+    flag=0
+    print('Fail Threshold =', [limit])
+    
+    for i in range(len(tarScore)):
+        if flag == 0:
+            if tarScore[i] > limit:
+
+              flag=1
+              print('misclassified sample, prediction:', realLabel_string[tarPred[i]], 'true label:',
+              tar1Label_string[tarLabel[i]])
+              temp = tarPoints[i]
+              #round_tarScore = round(tarScore[i], 5)
+              x = [vector[0] for vector in temp]
+              y = [vector[1] for vector in temp]
+              z = [vector[2] for vector in temp],
+              fig = plt.figure()
+              ax = fig.add_subplot(111, projection='3d')
+              ax.view_init(-120, 20)            #adjust view angle
+              ax.axis("off")
+              ax.scatter(x, y, z, s=1)
+                  
+
+              #mis_tar = len(indeces)
+             # total_tar = len(tarScore)
+
+             #print('misclassified sample:', [mis_tar], 'out of', [total_tar])
+
+
+
+    
