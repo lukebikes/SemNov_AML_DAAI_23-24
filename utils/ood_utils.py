@@ -552,7 +552,7 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points):
     tarScore = to_numpy(tar_conf)
     tarPred = to_numpy(tar_preds)
     tarLabel = to_numpy(tar_labels)
-    tarPoints = [t.numpy() for t in tar_points]
+    tarPoints = [t.cpu.numpy() for t in tar_points]
 
     limit = 0.95 
     flag=0
