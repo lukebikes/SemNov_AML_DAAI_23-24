@@ -18,7 +18,7 @@ from utils.data_utils import H5_Dataset
 from datasets.modelnet import *
 from datasets.scanobject import *
 from models.classifiers import Classifier
-from utils.ood_utils import get_confidence, eval_ood_sncore, iterate_data_odin, \
+from utils.ood_utils2 import get_confidence, eval_ood_sncore, iterate_data_odin, \
     iterate_data_energy, iterate_data_gradnorm, iterate_data_react, estimate_react_thres, print_ood_output, \
     get_penultimate_feats, get_network_output
 import wandb
@@ -644,8 +644,9 @@ def eval_OOD_with_feats(model, train_loader, src_loader, tar1_loader, tar2_loade
     #case---->3
     eval_ood_sncore(
         scores_list=[src_scores, tar1_scores, tar2_scores],
-        preds_list=[src_pred, None, None],  # [src_pred, None, None],
-        labels_list=[src_labels, None, None],  # [src_labels, None, None],
+        preds_list=[src_pred, tar1_pred, tar2_pred],
+        labels_list=[src_labels, tar1_labels, tar2_labels],  
+        points_list=[src_points, tar1_points, tar2_points],
         src_label=1,  # confidence should be higher for ID samples
         Ancase=3
     )

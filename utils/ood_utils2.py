@@ -492,7 +492,7 @@ def eval_ood_sncore(scores_list, preds_list=None, labels_list=None, points_list=
     # as we use label 1 for IN-DISTRIBUTION and thus we consider it positive. 
     # the ood_metrics library argue to use 
 
-    if Ancase == 2:
+    if Ancase == 2 or Ancase == 3:
         failanalisis(tar1_conf, tar1_preds, tar1_labels, tar1_points, Ancase)
     
 
@@ -587,9 +587,9 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
               #mis_tar = len(indeces)
              
              
-    total_tar = len(tarScore)
+    #total_tar = len(tarScore)
 
-    print('misclassified sample:', [mis_tar], 'out of', [total_tar])
+    #print('misclassified sample:', [mis_tar], 'out of', [total_tar])
 
 
 
