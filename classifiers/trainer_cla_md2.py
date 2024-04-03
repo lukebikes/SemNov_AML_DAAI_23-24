@@ -597,8 +597,8 @@ def eval_OOD_with_feats(model, train_loader, src_loader, tar1_loader, tar2_loade
     # extract penultimate features, compute distances
     train_feats, train_labels = get_penultimate_feats(model, train_loader)
     src_feats, src_labels = get_penultimate_feats(model, src_loader)
-    tar1_feats, tar1_labels = get_penultimate_feats(model, tar1_loader)
-    tar2_feats, tar2_labels = get_penultimate_feats(model, tar2_loader)
+    tar1_feats, tar1_labels, tar1_points = get_penultimate_feats(model, tar1_loader)
+    tar2_feats, tar2_labels, tar2_points = get_penultimate_feats(model, tar2_loader)
     train_labels = train_labels.cpu().numpy()
 
     labels_set = set(train_labels)
