@@ -595,8 +595,8 @@ def eval_OOD_with_feats(model, train_loader, src_loader, tar1_loader, tar2_loade
     print("Computing OOD metrics with distance from train features...")
 
     # extract penultimate features, compute distances
-    train_feats, train_labels = get_penultimate_feats(model, train_loader)
-    src_feats, src_labels = get_penultimate_feats(model, src_loader)
+    train_feats, train_labels, train_points = get_penultimate_feats(model, train_loader)
+    src_feats, src_labels, src_points = get_penultimate_feats(model, src_loader)
     tar1_feats, tar1_labels, tar1_points = get_penultimate_feats(model, tar1_loader)
     tar2_feats, tar2_labels, tar2_points = get_penultimate_feats(model, tar2_loader)
     train_labels = train_labels.cpu().numpy()
@@ -633,14 +633,21 @@ def eval_OOD_with_feats(model, train_loader, src_loader, tar1_loader, tar2_loade
     src_pred = np.asarray([train_labels[i] for i in src_ids])  # pred is label of nearest training sample
 
     # OOD tar1
-    tar1_dist, _ = knn(train_feats.unsqueeze(0), tar1_feats.unsqueeze(0))
+    tar1_dist, tar1_ids = knn(train_feats.unsqueeze(0), tar1_feats.unsqueeze(0))
     tar1_dist = tar1_dist.squeeze().cpu()
+    tar1_ids = tar1_ids.squeeze().cpu()  # index of nearest training sample
     tar1_scores = 1 / tar1_dist
+    tar1_pred = np.asarray([train_labels[i] for i in tar1_ids])  # pred is label of nearest training sample
+    trainPoints = [t.cpu().numpy() for t in train_points]
+    tar1_train_points = np.asarray([trainPoints[i] for i in tar1_ids]) # gets the corresponding pointclouds of the closest training sample
 
     # OOD tar2
-    tar2_dist, _ = knn(train_feats.unsqueeze(0), tar2_feats.unsqueeze(0))
+    tar2_dist, tar2_ids = knn(train_feats.unsqueeze(0), tar2_feats.unsqueeze(0))
     tar2_dist = tar2_dist.squeeze().cpu()
+    tar2_ids = tar2_ids.squeeze().cpu()  # index of nearest training sampl
     tar2_scores = 1 / tar2_dist
+    tar2_pred = np.asarray([train_labels[i] for i in tar2_ids])  # pred is label of nearest training sample
+    
     #case---->3
     eval_ood_sncore(
         scores_list=[src_scores, tar1_scores, tar2_scores],

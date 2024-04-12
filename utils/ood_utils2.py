@@ -209,6 +209,7 @@ def get_penultimate_feats(model, loader):
     """ DDP impl """
     all_feats = []
     all_labels = []
+    all_points = []
     model.eval()
     for i, batch in enumerate(tqdm(loader, disable=DISABLE_TQDM), 0):
         points, labels = batch[0], batch[1]
@@ -221,9 +222,11 @@ def get_penultimate_feats(model, loader):
             labels = gather(labels, dim=0)
         all_feats.append(feats)
         all_labels.append(labels)
+        all_points.append(points)
     all_feats = torch.cat(all_feats)
     all_labels = torch.cat(all_labels, dim=0)
-    return all_feats, all_labels
+    all_points = torch.cat(all_points, dim=0)
+    return all_feats, all_labels, all_points
 
 
 def iterate_data_odin(model, loader, epsilon=0.0, temper=1000):
@@ -559,14 +562,19 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
     tarLabel = to_numpy(tar_labels)
     tarPoints = [t.cpu().numpy() for t in tar_points]
 
-    limit = 0.95 
+    if AnCase == 2:
+      limit = 0.95 
+    elif AnCase == 3:
+      limit = 0.80
+        
     flag=0
     print('Fail Threshold =', [limit])
     
     for i in range(len(tarScore)):
         if flag == 0:
+            print('test')
             if tarScore[i] > limit:
-
+              print('test2')
               flag=1
               print('misclassified sample, prediction:', realLabel_string[tarPred[i]], 'true label:',
               tar1Label_string[tarLabel[i]])
