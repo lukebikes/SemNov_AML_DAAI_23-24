@@ -565,7 +565,7 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
     if AnCase == 2:
       limit = 0.95 
     elif AnCase == 3:
-      limit = 0.80
+      limit = 0.15
         
     flag=0
     print('Fail Threshold =', [limit])
