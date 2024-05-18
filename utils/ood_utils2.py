@@ -592,12 +592,7 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
                       f'/content/pred_{realLabel_string[tarPred[i]]}_real_{tar1Label_string[tarLabel[i]]}_{i}.jpg') 
                   
 
-              #mis_tar = len(indeces)
-             
-             
-    #total_tar = len(tarScore)
-
-    #print('misclassified sample:', [mis_tar], 'out of', [total_tar])
+         
 
 
 
