@@ -571,11 +571,11 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
     print('Fail Threshold =', [limit])
     
     for i in range(len(tarScore)):
-        if flag == 0:
+        if flag < 6:
             print('test')
             if tarScore[i] > limit:
               print('test2')
-              flag=1
+              flag += 1
               print('misclassified sample, prediction:', realLabel_string[tarPred[i]], 'true label:',
               tar1Label_string[tarLabel[i]])
               temp = tarPoints[i]
@@ -589,7 +589,7 @@ def failanalisis(tar_conf, tar_preds, tar_labels, tar_points, AnCase):
               ax.axis("off")
               ax.scatter(x, y, z, s=1)
               fig.savefig(
-                      f'/content/pred_{realLabel_string[tarPred[i]]}_real_{tar1Label_string[tarLabel[i]]}_{i}.jpg') 
+                      f'/content/pred_{realLabel_string[tarPred[i]]}_real_{tar1Label_string[tarLabel[i]]}_{i}_[AnCase].jpg') 
                   
 
          
